@@ -1,0 +1,30 @@
+# ============================================================
+# 全局配置(readme §8 config/base.yaml)
+# ============================================================
+paths:
+  templates_dir: "templates/motorcad"        # 手工 .mtt 模板
+  models_dir: "models/motorcad"              # 用户 .mot 输入 / 生成工程
+  exports_dir: "models/maxwell"              # 导出到 Maxwell 的脚本(AEDT 侧输入)
+  results_dir: "results"                     # 输出根目录
+  help_dir: "help_md"                        # AEDT/Motor-CAD 帮助文档
+
+versions:
+  motorcad: "2026R1"
+  aedt: "2026.1"
+  pyaedt: "1.2.0"
+  matlab: "R2024b"
+
+licenses:
+  ansyslm: "1055@localhost"                  # ANSYSLMD_LICENSE_FILE
+
+timeouts_sec:
+  connect_motorcad: 180
+  emag_calc: 900                             # do_magnetic_calculation 上限
+  export_maxwell: 300
+
+export:
+  maxwell_full_model: true                   # Full Machine 导出(SymmetryFactor=1,故障样机用)
+  # 注意:导出脚本扩展名由 Motor-CAD 强制为 .py(忽略 .vbs 指定)
+
+thresholds:
+  torque_error_pct: 5.0                      # 结果与参考值容差(占位,M2 对标用)

@@ -1,0 +1,32 @@
+# 仿真目标：Twin Builder ⇄ Simulink 绑定自动化
+# 对应设计 docs/design/simulink-binding.md §2.3（异常超时）、§4.1（块路径）、§4.2（文件对话框）、§5.1
+# 只放可调阈值与控件标识；判据在代码里写死，改这里不改验收条件。
+
+# 触发后等对话框出现（设计 §2.3「弹窗未出现」，默认 60 s）
+window_wait_s: 60
+
+# 点 OK 后等窗口销毁；超时判「弹窗卡死」→ 杀引擎重建（设计 §2.3，默认 120 s）
+close_wait_s: 120
+
+# 窗口轮询间隔（设计 §2.2：200 ms）
+poll_interval_s: 0.2
+
+# 窗口内单步操作（勾选 / Browse / 点 OK）超时（设计 §2.3「弹窗出现但不响应」）
+step_timeout_s: 30
+
+# 点 Browse 后等原生文件对话框（实测 0.2 s 内出现）
+file_dialog_wait_s: 10
+
+# MATLAB 引擎启动就绪（首次启动较慢）
+engine_ready_s: 300
+
+# 建块用的库路径（设计 §4.1 第 1 步）
+block_path: 'simulink/User-Defined Functions/S-Function'
+
+# 绑定对话框的定位与宿主进程（设计 §2.2 条件①②③、§4.1 第 3 步）
+dialog_title: 'Simplorer Link Assignment Dialog'
+dialog_class: '#32770'
+dialog_host_exe: 'Sim2SimDialog.exe'
+
+# Browse 弹出的 Windows 原生文件对话框标题（设计 §4.2）
+file_dialog_title: '打开'

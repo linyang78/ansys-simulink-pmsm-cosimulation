@@ -1,0 +1,74 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# ===== 会话临时区 =====
+.thincoder/tmp/
+.thincoder/memory/
+
+# ===== 第三方克隆仓库（公开仓库，按 URL 重新克隆即可）=====
+# 来源清单内联在 help/README.md 的目录总览
+help/repos/
+
+# ===== Ansys 官方帮助快照（66.8 MB，生成物，不纳入版本库）=====
+help/ansys-help-topics/
+
+# ===== AEDT 运行产物 =====
+*.aedtresults/
+*.aedtresults
+*.asol
+*.aedt.lock
+*.lock
+*.his
+*.sdb
+*.prf
+*.profile
+*.stats
+*.amo
+*.imesh
+*.smesh*
+*.cmesh*
+*.2dmd
+*.edg
+*.msh
+*.fld
+*.sstr
+*.str
+*.ths
+*.tls
+*.vls
+*.ctrf
+*.fct
+*.mfcts
+*.ExprCache
+*.sml
+*.smt
+*.sph
+logfile
+
+# ===== Simulink 运行产物 =====
+slprj/
+*.slxc
+*.mldatx
+*.slx.autosave
+*.slx.r20*
+
+# ===== Motor-CAD 运行日志 =====
+models/motorcad/**/MessageLogs/
+
+# ===== 通用 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+*.bak

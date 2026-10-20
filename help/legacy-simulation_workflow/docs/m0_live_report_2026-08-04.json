@@ -1,0 +1,26 @@
+{
+  "date": "2026-08-04",
+  "python": "3.11.15 (conda env pyaedt @ C:\\Env\\anaconda3\\envs\\pyaedt)",
+  "steps": {
+    "MotorCAD: launch + save .mot": {
+      "status": "OK",
+      "sec": 23.9,
+      "detail": "ansys-motorcad-core 0.8.6, MotorCAD() via COM/RPC, saved probe .mot, quit() available"
+    },
+    "MATLAB: engine + Simulink + MEX compile probe": {
+      "status": "OK",
+      "sec": 14.5,
+      "detail": "matlabengine 24.2, version=24.2.0.2712019 (R2024b), license('test','Simulink')=1, tiny-model sim OK, MEX compiler detected via MW_MINGW64_LOC=F:\\Env\\mingw64 (gcc 15.2.0), real compile+call of minimal MEX returned 42.0"
+    },
+    "AEDT: Maxwell2d non-graphical": {
+      "status": "OK",
+      "sec": 12.2,
+      "detail": "pyaedt 1.2.0, Maxwell2d(project='m0_probe', design='Motion1', solution_type='Transient', version='2026.1', non_graphical=True) via gRPC; design created, project saved, closed, desktop released"
+    }
+  },
+  "notes": [
+    "readme.md claimed M0 passed on 2026-08-02; all three tool launches reproduced successfully on 2026-08-04.",
+    "Trap found: Maxwell2d(project=...) with a path but no .aedt extension triggers OpenProject failure (GrpcApiError); use bare project name or full path with extension.",
+    "No leftover ansysedt/MotorCAD processes after verification (license hygiene OK)."
+  ]
+}

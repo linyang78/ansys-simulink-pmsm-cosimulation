@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# 运行产物(按 readme §8,results/ 为输出目录)
+results/
+
+# 自动生成的工程文件(models/ 为脚本产物,手工模板见 templates/;
+# 用户提供的 .mot 输入与手动导出的 .py 脚本保留入库 —— 注意:必须先放行
+# 目录本身,再忽略子目录,最后放行保留文件(git 不会进入被忽略的父目录)
+models/*
+!models/motorcad/
+models/motorcad/*/
+models/motorcad/*.bak
+models/motorcad/*.aedt*
+!models/motorcad/*.mot
+!models/motorcad/*.py
+
+# Motor-CAD COM 启动时在 CWD 生成的瞬时批处理日志
+batch.log
+
+# Ansys / MATLAB 临时工程文件
+*.aedt.lock
+*.mxengine*

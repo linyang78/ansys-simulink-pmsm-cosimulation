@@ -1,0 +1,42 @@
+# ============================================================
+# 场景配置(readme §7.3 示例结构;参数名为 Motor-CAD activex 变量,2026-08-04 实测)
+# ============================================================
+motor:
+  type: "e11_bpm"                  # e11 模板:8极48槽 BPM(SPM/IPM 由模板决定)
+  template: "models/motorcad/e11_User.mot"   # Full Machine 状态(用户 GUI 设置)
+  pole_pairs: 4
+  slots: 48
+  dc_bus_v: 400
+  params:                          # activex 变量覆盖模板默认值(实测基线)
+    Airgap: 1                      # mm
+    RotorOuterDiameter: 130        # mm
+    ActiveLength: 160              # mm
+    Shaft_Hole_Diameter: 0         # mm
+    Magnet_Br_at_RefTemp: 1.125    # T(参考温度下剩磁)
+    Magnet_HcJ_at_RefTemp: 1990000 # A/m(内禀矫顽力)
+    PeakCurrent: 433               # A(峰值相电流,运行点)
+    PhaseAdvance: 65.79            # 电角度(相位提前角)
+    ParallelPaths: 2               # 并联支路数
+
+co_sim:
+  mode: "twinbuilder_simulink"     # A 全耦合 / B 等效模型 / C 离线
+  sample_time_s: 1e-5
+  stop_time_s: 2.0
+
+export:
+  maxwell_full_model: true         # Full Machine 导出(故障样机需要完整 360° 模型)
+  airgap_cylindrical_mesh: true    # 气隙圆柱网格(Maxwell 2D 求解必需——实测不开
+                                   # 会报 "Edge is not preserved in the mesh" 求解失败)
+
+scenarios:
+  - name: "healthy"                # 基线(M1 只跑此场景;故障注入见 M5)
+    fault: none
+  # ---- M5 预留:故障场景矩阵(readme §6.1) ----
+  # - name: "phase_a_open"
+  #   fault: { type: "phase_open", phase: "A", time_s: 0.5 }
+  # - name: "interturn_short_10pct"
+  #   fault: { type: "interturn", phase: "A", ratio: 0.1, r_short_mohm: 50, time_s: 0.5 }
+  # - name: "demag_20pct"
+  #   fault: { type: "demagnetization", mode: "global", br_ratio: 0.8 }
+  # - name: "eccentricity_static_20pct"
+  #   fault: { type: "eccentricity", mode: "static", ratio: 0.2 }

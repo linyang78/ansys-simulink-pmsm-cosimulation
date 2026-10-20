@@ -1,0 +1,1 @@
+- [ ] T2: VS Code 扩展宿主挂载 pyaedt-mcp（需全局 config.json 的 mcp.servers 条目，待用户决策）

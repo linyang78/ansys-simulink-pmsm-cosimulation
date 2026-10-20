@@ -1,0 +1,13 @@
+{
+    "mcpServers": {
+        "pyaedt-mcp": {
+            "command": "C:\\Env\\miniconda3\\envs\\pmsm\\python.exe",
+            "args": [
+                "-m",
+                "ansys.aedt.mcp",
+                "--transport",
+                "stdio"
+            ]
+        }
+    }
+}
