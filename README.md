@@ -17,7 +17,7 @@ PMSM（永磁同步电机）多域联合仿真自动化工具集。
 |---|---|---|
 | 从 Motor-CAD 导出 ECE 等效电路，手工点十几步，参数容易填错 | 每次 20–30 min | `dist/ece-export` 一条命令 |
 | Twin Builder 的电机模型要逐个绑定到 Simulink，靠鼠标点对话框 | 每个模型 5–10 min | `dist/simulink-binding` 批量绑定 |
-| Maxwell 的 ECE 提取要在电路编辑器里拖元件、配参数扫描 | 每次 30 min+ | `src/maxwell_ece` 五步流程 |
+| Maxwell 的 ECE 提取要在电路编辑器里拖元件、配参数扫描 | 每次 30 min+ | `dist/maxwell-ece` 五步流程 |
 
 三个工具都做成**命令行 + 明确退出码**，不依赖 GUI 点击，可以直接嵌入脚本或由 agent 调用。
 
@@ -93,28 +93,33 @@ python scripts/calc_control_params.py --mat <ECE_map.mat> --json-out params.json
 
 ---
 
-### 3. `src/maxwell_ece` — Maxwell 原生 ECE 提取
+### 3. `dist/maxwell-ece` — Maxwell 原生 ECE 提取
 
 在 Maxwell 2D 里用 **ECE3_Model + ECER_Model** 组合提取电机的饱和与转矩查表，
 产出 `.sph` 网表 + `.sml` 模型 + `.txt` 查表。
 
 与工具 2 的区别：工具 2 走 Motor-CAD 的解析模型（快），工具 3 走 Maxwell 的有限元解（准，但慢）。
+故障样机、几何改型后的模型只能用这条路径。
 
 ```powershell
 $py  = 'python'
 $cli = 'scripts/maxwell_ece.py'
-$mot = '..\..\models\aedt\E11_FULL\e11_PMSM_IPM.aedt'
+$mot = 'models/e11_PMSM_IPM.aedt'
 
-& $py $cli inspect  $mot --write config\inspection.json      # 离线读工程结构
-& $py $cli draft    $mot --design PMSM_Healthy --setup Setup1 --write config\draft.json
-& $py $cli validate config\draft.json --inspection config\inspection.json
-& $py $cli prepare  config\draft.json                        # 隔离副本
-& $py $cli run      config\draft.json                        # 启动 AEDT 求解
+& $py $cli inspect  $mot --write config/inspection.json      # 离线读工程结构
+& $py $cli draft    $mot --design PMSM_Healthy --setup Setup1 --write config/draft.json
+& $py $cli validate config/draft.json --inspection config/inspection.json
+& $py $cli prepare  config/draft.json                        # 隔离副本
+& $py $cli run      config/draft.json                        # 启动 AEDT 求解
 ```
+
+**五步流程**：前三步离线（不启动 AEDT），`prepare` 复制到隔离目录，`run` 才真正求解。
 
 **`inspect` 自动识别**：design 名、setup、绕组组、运动设置全部从 `.aedt` 文本解析，
 不依赖写死的名字。多个 design/setup 时必须显式指定 `--design` 和 `--setup`，
 工具不会替你挑（防止选错）。
+
+**产物**：`<output_dir>/<run-id>/ece_model.sml`（导入 Twin Builder 用）+ `ece_table.txt` + `.sph`
 
 **核心 API 链路**（pyaedt 1.4.0 未直接暴露，走原生接口）：
 
@@ -123,6 +128,8 @@ write_ece_netlist(...)                              # 按厂家模板生成 .sph
 m2d.edit_external_circuit(netlist_file_path=sph)    # 挂载到 Maxwell
 m2d.oanalysis.ExportECEData(export_args)            # 原生 ECE 导出
 ```
+
+`ExportECEData` 成功时返回 `None`——不能用返回值判断成败，要看文件是否真的落盘。
 
 ---
 
@@ -145,7 +152,7 @@ m2d.oanalysis.ExportECEData(export_args)            # 原生 ECE 导出
 | 母线电压 | 400 V |
 | 峰值电流 | 433 A |
 
-由 ECE 数据反推的控制参数（`results/e11-control-params.json`）：
+由 ECE 数据反推的控制参数（`dist/ece-export/scripts/calc_control_params.py` 可重算）：
 
 | 参数 | 值 |
 |---|---|
@@ -157,16 +164,14 @@ m2d.oanalysis.ExportECEData(export_args)            # 原生 ECE 导出
 > 电感按**磁链反推**（`Lq = λq/iq`、`Ld = (λd − λpm)/id`），不直接取 MAT 里的 `Ld`/`Lq` 字段——
 > 后者在零电流处是除零产物，量纲与标称不符。
 
-模型位置：
+模型样例：
 
 ```
 models/
-├── motorcad/
-│   ├── e11_User.mot              Motor-CAD 模型（Full Machine 状态）
-│   └── ece/Results/              ECE 三件套样例
-└── aedt/
-    ├── E11_FULL/e11_PMSM_IPM.aedt  Maxwell 2D，含 PMSM_Healthy + PMSM_UD 两个 design
-    └── E11/e11_IPM.aedt            单 design 版本
+├── motorcad/e11_User.mot           Motor-CAD 模型（Full Machine 状态）
+└── aedt/E11_FULL/e11_PMSM_IPM.aedt Maxwell 2D，含 PMSM_Healthy + PMSM_UD 两个 design
+
+dist/maxwell-ece/models/e11_PMSM_IPM.aedt   工具 3 自带的同一份工程
 ```
 
 ---
@@ -175,24 +180,19 @@ models/
 
 ```
 ansys-simulink-pmsm-cosimulation/
-├── dist/                     可独立取用的自包含工具包
-│   ├── simulink-binding/     └ 工具 1（含 README、配置、单测）
-│   └── ece-export/           └ 工具 2
+├── dist/                       可独立取用的自包含工具包
+│   ├── simulink-binding/       工具 1：Twin Builder ⇄ Simulink 绑定
+│   ├── ece-export/             工具 2：Motor-CAD ECE 导出
+│   └── maxwell-ece/            工具 3：Maxwell 原生 ECE 提取
 ├── src/
-│   ├── maxwell_ece/          工具 3（完整五步流程 + MCP 服务）
-│   ├── motorcad_controller/  Motor-CAD 控制
-│   ├── simulink_controller/  Simulink 绑定
-│   └── data_exchange/        .aedt 解析与数据模型
-├── scripts/                  命令行入口
-├── config/                   配置
-├── models/                   电机模型（Motor-CAD / Maxwell）
-├── docs/                     需求与设计文档
-│   ├── requirements/
-│   ├── design/
-│   └── batches/              实施批次记录
-├── help/                     资料库（环境清单、学习笔记）
-├── results/                  运行产物
-└── tests/                    单元测试
+│   ├── maxwell_ece/            工具 3 的源码位置（与 dist 同步）
+│   ├── motorcad_controller/    Motor-CAD 控制
+│   ├── simulink_controller/    Simulink 绑定
+│   └── data_exchange/          .aedt 解析与数据模型
+├── scripts/                    命令行入口
+├── config/                     配置
+├── models/                     电机模型样例
+└── tests/                      单元测试
 ```
 
 ---
@@ -231,14 +231,13 @@ python -m pytest tests/ -q
 
 ## 一点说明
 
-这些工具是在真实工程里**撞出来的**，不是先设计好再实现。所以代码和文档里保留了大量实测记录：
+这些工具是在真实工程里**撞出来的**，不是先设计好再实现。所以代码和 README 里保留了大量实测记录：
 
 - 某个 API 不能用、换哪条路能用
 - 某个参数填错会导致什么后果（比如网格必须含 0 A）
 - 某条路试过但失败，为什么放弃
 
-这些记录在 `docs/` 和 `help/` 里。它们对后来者比结论本身更有用——
-同样的坑不必再踩一遍。
+它们对后来者比结论本身更有用——同样的坑不必再踩一遍。
 
 ---
 
