@@ -1,0 +1,59 @@
+Begin ECE model setup: .MODEL ECE_Model1_Full360_PMSM_Healthy_ECE3 ECE3 (Windings=WG_Ph1_P1,WG_Ph2_P1,WG_Ph3_P1 Sweeps=0A,21.65A,43.3A,108.25A,216.5A,324.75A,433A PAngN=2 Res=0.0133773639742649ohm Ind=6.02692576178796e-06H)
+ Model Length: 200
+ Keyword: Windings; 	Value: WG_Ph1_P1,WG_Ph2_P1,WG_Ph3_P1
+ Remaining String: Sweeps=0A,21.65A,43.3A,108.25A,216.5A,324.75A,433A PAngN=2 Res=0.0133773639742649ohm Ind=6.02692576178796e-06H
+ Remaining Length: 110
+ Keyword: Sweeps; 	Value: 0A,21.65A,43.3A,108.25A,216.5A,324.75A,433A
+ Remaining String: PAngN=2 Res=0.0133773639742649ohm Ind=6.02692576178796e-06H
+ Remaining Length: 59
+ Keyword: PAngN; 	Value: 2
+ Remaining String: Res=0.0133773639742649ohm Ind=6.02692576178796e-06H
+ Remaining Length: 51
+ Keyword: Res; 	Value: 0.0133773639742649ohm
+ Remaining String: Ind=6.02692576178796e-06H
+ Remaining Length: 25
+ Keyword: Ind; 	Value: 6.02692576178796e-06H
+ Remaining String: 
+ Remaining Length: 0
+End ECE model setup
+Begin ECE model setup: .MODEL ECE_Model1_Full360_PMSM_Healthy_ECER ECER (RAngM=360deg EDeg=false RAngN=1440 Skew=0deg Poles=8 Slots=0 DQOutput=0)
+ Model Length: 122
+ Keyword: RAngM; 	Value: 360deg
+ Remaining String: EDeg=false RAngN=1440 Skew=0deg Poles=8 Slots=0 DQOutput=0
+ Remaining Length: 58
+ Keyword: EDeg; 	Value: false
+ Remaining String: RAngN=1440 Skew=0deg Poles=8 Slots=0 DQOutput=0
+ Remaining Length: 47
+ Keyword: RAngN; 	Value: 1440
+ Remaining String: Skew=0deg Poles=8 Slots=0 DQOutput=0
+ Remaining Length: 36
+ Keyword: Skew; 	Value: 0deg
+ Remaining String: Poles=8 Slots=0 DQOutput=0
+ Remaining Length: 26
+ Keyword: Poles; 	Value: 8
+ Remaining String: Slots=0 DQOutput=0
+ Remaining Length: 18
+ Keyword: Slots; 	Value: 0
+ Remaining String: DQOutput=0
+ Remaining Length: 10
+ Keyword: DQOutput; 	Value: 0
+ Remaining String: 
+ Remaining Length: 0
+End ECE model setup
+
+ Start arrays delete.
+ Node arrays deleted.
+ Winding arrays deleted.
+ Other arrays deleted.
+ Circuit arrays deleted.
+ Coil arrays deleted.
+ Mat arrays deleted.
+ Branch arrays deleted.
+ Mutual arrays deleted.
+ Mutual0 arrays deleted.
+ Var arrays deleted.
+ V_output arrays deleted.
+ Aa arrays deleted.
+ Bf arrays deleted.
+ Bfv arrays deleted.
+ Tree, Re, Vs, I0 arrays deleted.
