@@ -1,298 +1,403 @@
-# Ansys-Simulink PMSM Cosimulation Scripts
+# Ansys–Simulink PMSM Co-simulation Scripts
 
-PMSM（永磁同步电机）多域联合仿真自动化工具集。
+**English** | [中文](README.zh-CN.md)
 
-把 **Motor-CAD**（快速建模）、**Ansys Maxwell**（有限元求解）、**Twin Builder**（驱动电路）、**MATLAB Simulink**（闭环控制）
-串成一条自动化链路，用于电机的建模仿真、控制策略验证与故障注入分析。
+Automation tooling for permanent magnet synchronous motor (PMSM) multi-domain co-simulation.
 
-以宝马 i3（e11）IPM 电机为贯穿案例。
+It chains **Motor-CAD** (rapid modeling) → **Ansys Maxwell** (finite-element solving) →
+**Ansys Twin Builder** (drive circuit) → **MATLAB/Simulink** (closed-loop control)
+into a scriptable pipeline for motor modeling, control-strategy validation, and fault-injection studies.
+
+The case study threaded through this repository is the BMW i3 (e11) interior permanent magnet (IPM) motor.
 
 ---
 
-## 这个仓库解决什么问题
+## The problem this repository solves
 
-做电机仿真时，真正费时的不是跑一次 FEA，而是**工具之间的搬运**：
+In motor simulation, the time sink is rarely the FEA solve itself — it is **moving data between tools**:
 
-| 痛点 | 典型耗时 | 本仓库的做法 |
+| Pain point | Typical cost | What this repository does |
 |---|---|---|
-| 从 Motor-CAD 导出 ECE 等效电路，手工点十几步，参数容易填错 | 每次 20–30 min | `dist/ece-export` 一条命令 |
-| Twin Builder 的电机模型要逐个绑定到 Simulink，靠鼠标点对话框 | 每个模型 5–10 min | `dist/simulink-binding` 批量绑定 |
-| Maxwell 的 ECE 提取要在电路编辑器里拖元件、配参数扫描 | 每次 30 min+ | `dist/maxwell-ece` 五步流程 |
+| Exporting an ECE equivalent circuit from Motor-CAD: a dozen manual clicks, easy to mis-enter | 20–30 min each | `dist/ece-export`, one command |
+| Binding each Twin Builder machine model to Simulink through GUI dialogs | 5–10 min per model | `dist/simulink-binding`, batch binding |
+| Extracting a Maxwell ECE model: placing elements in the circuit editor, configuring sweeps | 30 min+ each | `dist/maxwell-ece`, a five-step flow |
 
-三个工具都做成**命令行 + 明确退出码**，不依赖 GUI 点击，可以直接嵌入脚本或由 agent 调用。
+All three are **CLI tools with explicit exit codes** — no GUI clicking, so they drop straight into scripts
+or into agent-driven workflows.
 
 ---
 
-## 三个工具
+## The three tools
 
-### 1. `dist/simulink-binding` — Twin Builder ⇄ Simulink 绑定
+### 1. `dist/simulink-binding` — Twin Builder ⇄ Simulink binding
 
-从 `.aedt` 里找出 `SimulinkData` 元件，为每个元件生成独立的 `.slx`，
-里面含一个 `AnsoftSFunction` 块并完成绑定参数写入。
+Finds `SimulinkData` components inside an `.aedt` project and generates a separate `.slx` for each,
+containing one `AnsoftSFunction` block with the binding parameters written in.
 
 ```powershell
-# 先探路，看有多少个可选元件
-python scripts/bind_simulink.py <工程.aedt> --dry-run
+# Reconnaissance first: see how many components are available
+python scripts/bind_simulink.py <project.aedt> --dry-run
 
-# 正式生成
-python scripts/bind_simulink.py <工程.aedt> --out-dir <输出目录>
+# Generate
+python scripts/bind_simulink.py <project.aedt> --out-dir <output-dir>
 ```
 
-**产物**：`<输出目录>/<design名>.slx`，一个模型一个块。
+**Output:** `<output-dir>/<design-name>.slx` — one model per block.
 
-**为什么一块一个模型**：实测同一模型里连续绑多个块时，第 2 块必然失败（绑定对话框 60 s 不出现），
-改成每块独立模型后全部成功。根因未定位，按实测可用形态定型。
+**Why one model per block:** binding several blocks consecutively inside a single model reliably fails
+from the second block onward (the binding dialog never appears within 60 s). With one model per block,
+every case succeeded. The root cause was not identified; the shipped form follows what measured clean.
 
-**退出码**
+**Exit codes**
 
-| 码 | 含义 | 该怎么做 |
+| Code | Meaning | What to do |
 |---|---|---|
-| 0 | 全部成功 | 读 `<out-dir>/*.slx` |
-| 1 | 部分失败 | 看 stdout 结果表的 `FAIL` 行 |
-| 2 | 解析失败（路径/无元件） | **不要重试**，输入问题 |
-| 3 | 引擎失败（MATLAB 起不来） | 检查环境后**可重试一次** |
+| 0 | All blocks bound and verified | Read `<out-dir>/*.slx` |
+| 1 | Partial failure | Inspect the `FAIL` rows in the stdout result table |
+| 2 | Parse failure (bad path / no components) | **Do not retry** — this is an input problem |
+| 3 | Engine failure (MATLAB will not start) | Check the environment, then **retry once** |
 
 ---
 
-### 2. `dist/ece-export` — Motor-CAD ECE 等效电路提取
+### 2. `dist/ece-export` — Motor-CAD ECE equivalent circuit export
 
-从 Motor-CAD 的 `.mot` 模型导出 Twin Builder 可直接导入的 **ECE 三件套**（SML / TXT / MAT），
-并可从 MAT 反推电机参数、计算 PI 控制参数。
+Exports the **ECE triplet** (SML / TXT / MAT) from a Motor-CAD `.mot` model, ready to import into Twin Builder,
+and derives machine parameters and PI control gains from the resulting MAT file.
 
 ```powershell
-# 先校验配置
+# Validate the configuration first
 python scripts/run_ece_export.py --config config/ece_config.json --dry-run
 
-# 正式导出
+# Export
 python scripts/run_ece_export.py --config config/ece_config.json
 
-# 从结果算控制参数
+# Derive control parameters
 python scripts/calc_control_params.py --mat <ECE_map.mat> --json-out params.json
 ```
 
-**产物**
+**Output**
 
 ```
 <output_dir>/
-├── ECE_<base>_map.mat       饱和图原始数据
-├── ECE_<base>_txt_file.txt  可读查表（Ψd/Ψq/Ψ0/转矩）
-└── ECE_<base>_sml_file.sml  ← 导入 Twin Builder 用这个
+├── ECE_<base>_map.mat       Raw saturation map
+├── ECE_<base>_txt_file.txt  Human-readable lookup table (Ψd/Ψq/Ψ0/torque)
+└── ECE_<base>_sml_file.sml  ← import this one into Twin Builder
 ```
 
-**⚠️ 网格必须包含 0 A**：Motor-CAD 硬性要求 `Id = 0` 的点存在。
-所以 `2 × id_max / current_step` 必须是偶数（点数 = 段数 + 1 = 奇数），否则会白跑几小时才报错。
-脚本会在跑 FEA 前本地校验。
+**⚠️ The grid must contain 0 A.** Motor-CAD requires a point at `Id = 0`.
+Therefore `2 × id_max / current_step` must be even (points per axis = segments + 1 = odd),
+or the run fails only after hours of solving. The script validates this locally before starting FEA.
 
-| 段数 | 点数/轴 | 步长（±433 A） | 负载点 | 实测耗时 |
+| Segments | Points/axis | Step (±433 A) | Operating points | Measured time |
 |---|---|---|---|---|
 | 8 | 9 | 108.25 A | 81 | 5.2 min |
 | 20 | 21 | 43.30 A | 441 | 29.5 min |
 | 60 | 61 | 14.43 A | 3,721 | 243.5 min |
 
-**退出码**：0 成功 · 1 导出失败（可重试）· 2 配置不可用（不要重试）· 3 Motor-CAD 连不上
+**Exit codes:** 0 success · 1 export failure (retryable) · 2 unusable configuration (do not retry) · 3 Motor-CAD unreachable
 
 ---
 
-### 3. `dist/maxwell-ece` — Maxwell 原生 ECE 提取
+### 3. `dist/maxwell-ece` — Maxwell native ECE extraction
 
-在 Maxwell 2D 里用 **ECE3_Model + ECER_Model** 组合提取电机的饱和与转矩查表，
-产出 `.sph` 网表 + `.sml` 模型 + `.txt` 查表。
+Combines **ECE3_Model + ECER_Model** inside Maxwell 2D to extract saturation and torque lookup tables,
+producing a `.sph` netlist, an `.sml` model, and a `.txt` lookup table.
 
-与工具 2 的区别：工具 2 走 Motor-CAD 的解析模型（快），工具 3 走 Maxwell 的有限元解（准，但慢）。
-故障样机、几何改型后的模型只能用这条路径。
+Difference from tool 2: tool 2 uses Motor-CAD's analytical model (fast); tool 3 uses the Maxwell finite-element
+solution (accurate, but slow). Faulty machines and re-dimensioned geometry can only take this path.
 
 ```powershell
 $py  = 'python'
 $cli = 'scripts/maxwell_ece.py'
 $mot = 'models/e11_PMSM_IPM.aedt'
 
-& $py $cli inspect  $mot --write config/inspection.json      # 离线读工程结构
+& $py $cli inspect  $mot --write config/inspection.json      # Offline: read project structure
 & $py $cli draft    $mot --design PMSM_Healthy --setup Setup1 --write config/draft.json
 & $py $cli validate config/draft.json --inspection config/inspection.json
-& $py $cli prepare  config/draft.json                        # 隔离副本
-& $py $cli run      config/draft.json                        # 启动 AEDT 求解
+& $py $cli prepare  config/draft.json                        # Isolated copy
+& $py $cli run      config/draft.json                        # Launch AEDT and solve
 ```
 
-**五步流程**：前三步离线（不启动 AEDT），`prepare` 复制到隔离目录，`run` 才真正求解。
+**Five-step flow:** the first three steps are offline (AEDT is not started), `prepare` copies the project into
+an isolated working directory, and only `run` actually solves.
 
-**`inspect` 自动识别**：design 名、setup、绕组组、运动设置全部从 `.aedt` 文本解析，
-不依赖写死的名字。多个 design/setup 时必须显式指定 `--design` 和 `--setup`，
-工具不会替你挑（防止选错）。
+**`inspect` identifies everything automatically:** design names, setups, winding groups, and motion setups are
+parsed from the `.aedt` text — nothing is hard-coded. When several designs or setups exist, `--design` and
+`--setup` must be given explicitly; the tool will not choose for you (a wrong pick costs hours of solving).
 
-**产物**：`<output_dir>/<run-id>/ece_model.sml`（导入 Twin Builder 用）+ `ece_table.txt` + `.sph`
+**Output:** `<output_dir>/<run-id>/ece_model.sml` (import into Twin Builder) + `ece_table.txt` + `.sph`
 
-**核心 API 链路**（pyaedt 1.4.0 未直接暴露，走原生接口）：
+**Core API chain** (not exposed directly by pyaedt 1.4.0; reached through native interfaces):
 
 ```python
-write_ece_netlist(...)                              # 按厂家模板生成 .sph
-m2d.edit_external_circuit(netlist_file_path=sph)    # 挂载到 Maxwell
-m2d.oanalysis.ExportECEData(export_args)            # 原生 ECE 导出
+write_ece_netlist(...)                              # Generate .sph from the vendor template
+m2d.edit_external_circuit(netlist_file_path=sph)    # Attach to Maxwell
+m2d.oanalysis.ExportECEData(export_args)            # Native ECE export
 ```
 
-`ExportECEData` 成功时返回 `None`——不能用返回值判断成败，要看文件是否真的落盘。
+`ExportECEData` returns `None` on success — the return value cannot be used to judge the outcome;
+check whether the files actually landed on disk.
 
 ---
 
-## 开发路线图
+## Development Roadmap
 
-**目标**：配置驱动的 PMSM 联合仿真自动化框架——
-一份配置描述电机型号、故障类型与严重程度、转速/负载、控制器参数，整套流程自动跑完。
+> **Goal:** An open-source, configuration-driven framework for permanent magnet synchronous motor (PMSM)
+> modeling, multi-tool co-simulation, fault injection, and reproducible simulation experiments.
 
-```
-配置（电机 · 故障 · 工况 · 控制器）
-        │
-        ▼
-Motor-CAD ECE → Maxwell ECE → Twin Builder 功率级 → Simulink 控制
-        │
-        ▼
-    批量工况 · 数据导出
-```
+### Vision
 
-### 已发布（本仓库三个工具）
+Researchers and engineers should be able to define a PMSM model, operating conditions, control settings,
+and fault scenarios in configuration files, then execute a repeatable simulation workflow without manually
+rebuilding connections and settings in multiple engineering applications.
 
-| 能力 | 位置 | 状态 |
+The framework integrates:
+
+- **Ansys Motor-CAD:** rapid machine modeling and equivalent circuit export.
+- **Ansys Maxwell:** finite-element modeling and ECE model extraction.
+- **Ansys Twin Builder (Simplorer):** inverter, electrical power system, and machine circuit simulation.
+- **MATLAB/Simulink:** motor control algorithms, including FOC and SVPWM, and closed-loop control.
+
+### Current Status
+
+| Component | Status | Scope |
 |---|---|---|
-| **Motor-CAD ECE 导出**<br>从 `.mot` 提取参数与等效电路 | `dist/ece-export` | ✅ 已发布 |
-| **Maxwell ECE 提取**<br>有限元模型 → ECE3 + ECER | `dist/maxwell-ece` | ✅ 已发布 |
-| **Simulink 绑定**<br>Twin Builder 模型与 Simulink 块绑定 | `dist/simulink-binding` | ✅ 已发布 |
+| Motor-CAD ECE export | Implemented; further validation ongoing | Automated ECE data/model export and parameter extraction |
+| Maxwell ECE extraction | Implemented; further validation ongoing | Scripted Maxwell ECE preparation and extraction workflow |
+| Twin Builder–Simulink model binding | Implemented; further validation ongoing | Automated binding and generation of associated Simulink models |
+| Twin Builder (Simplorer) + Simulink co-simulation automation | In development | Automate coupling of the power system and the control system |
+| Configuration-driven PMSM fault simulation suite | In development | Fault setup, batch scenarios, simulation runs, and result export |
 
-三门工具各自独立可用，有命令行、退出码、单元测试。
+"Implemented" means working code and documentation are present in the repository,
+**not** that every environment, model, or operating condition has been validated.
 
-> 「已发布」指工具本身可用且验证过冒烟，**不代表**所有版本、所有复杂工况都已覆盖。
+### Planned Architecture
 
-### 开发中
+```text
+                   Configuration files
+          (machine, operating conditions, faults,
+               controller and solver settings)
+                            |
+                            v
+                 Workflow orchestration
+                            |
+          +-----------------+-----------------+
+          |                 |                 |
+          v                 v                 v
+      Motor-CAD          Maxwell        Fault scenarios
+      ECE export       ECE extraction   and batch runner
+          |                 |                 |
+          +-----------------+-----------------+
+                            |
+                            v
+               Twin Builder / Simplorer
+                (PMSM + inverter + power)
+                            <---->
+                    MATLAB / Simulink
+                     (FOC–SVPWM control)
+                            |
+                            v
+               Simulation and data export
+              (currents, voltages, speed,
+                   torque, fault labels)
+```
 
-| 能力 | 说明 | 当前进度 |
-|---|---|---|
-| **联合仿真自动化** | Twin Builder 功率系统（逆变器、母线）+ Simulink 控制系统（FOC/SVPWM/MTPA）串成一条可运行的闭环 | 设计已完成，尚未实现代码 |
-| **PMSM 故障仿真套件** | 故障参数化配置 · 自动仿真 · 批量工况 · 数据导出 | 资料调研中 |
+The diagram represents the **target architecture**; the complete end-to-end workflow is not yet released.
 
-**故障类型规划**：
+### Development Milestones
 
-| 类别 | 故障 |
-|---|---|
-| 电磁 | 均匀退磁、局部退磁 |
-| 电磁/机械 | 静态偏心、动态偏心 |
-| 电气 | 定子绕组开路、匝间短路、相间短路 |
+#### M1 — Existing Automation Tools
 
-> 破坏对称性的故障（偏心、局部退磁、磁钢碎裂）必须用 **Full Machine（360° 完整模型）**，
-> 因为半模型无法表达非对称场。这是本项目的硬约束。
+**Status:** Implemented; improvements ongoing.
 
-### 为什么分两次做
+- [x] Motor-CAD ECE export CLI and documentation.
+- [x] Maxwell ECE extraction workflow and CLI.
+- [x] Twin Builder–Simulink model binding automation.
+- [x] Initial unit tests and example configurations.
+- [ ] Expand compatibility testing and improve error reporting.
+- [ ] Establish repeatable CI checks for tests that do not require commercial software.
 
-闭环联调需要电机侧模型先稳定。三个已发布工具产出的 ECE 模型就是闭环的输入——
-先把「电机侧」做扎实，再往上搭「功率级 + 控制级」，避免两边同时不确定、问题定位不到层。
+#### M2 — Twin Builder (Simplorer) + Simulink Co-simulation
+
+**Status:** In development. Design complete; no implementation code yet.
+
+- [ ] Define configuration schema for the coupled power and control models.
+- [ ] Automate Twin Builder circuit/project setup and Simulink controller binding.
+- [ ] Support FOC–SVPWM closed-loop simulation configurations.
+- [ ] Automate solver settings, signal exchange configuration, and run execution where supported by application APIs.
+- [ ] Validate representative steady-state and dynamic speed/load scenarios.
+- [ ] Export synchronized simulation outputs and run metadata.
+
+**Exit criteria:** A documented sample can run a coupled PMSM power-system/control-system simulation from a
+configuration file with clearly reported results and failures.
+
+#### M3 — Configuration-driven PMSM Fault Simulation Suite
+
+**Status:** In development. Research stage.
+
+- [ ] Define a versioned schema for motor, fault, severity, operating conditions, and output settings.
+- [ ] Implement fault-specific adapters where models and supported APIs permit.
+- [ ] Target representative fault categories: inter-turn short circuit, winding open circuit, demagnetization,
+      eccentricity, and inverter switch open circuit.
+- [ ] Provide parameter sweeps over speed, load, fault severity, and selected noise conditions.
+- [ ] Automate scenario execution, logging, and structured data export.
+- [ ] Preserve fault labels, configuration snapshots, software versions, and run identifiers for reproducibility.
+
+**Exit criteria:** Users can specify at least one validated fault type and multiple operating points via
+configuration, execute the supported runs, and obtain labeled data and reproducible run records.
+
+> **Safety and scope:** Fault implementation and physical fidelity depend on the underlying motor model and
+> simulator. High-risk or unsupported fault conditions are not assumed to be validated by automation alone.
+
+#### M4 — Reliability, Documentation, and Community Adoption
+
+**Status:** Planned.
+
+- [ ] Add end-to-end example projects with explicitly stated prerequisites.
+- [ ] Expand offline unit and regression tests, plus optional integration tests for licensed software environments.
+- [ ] Document application-version compatibility and known limitations.
+- [ ] Add contributor guidance, issue templates, and a release process.
+- [ ] Publish tagged releases with change logs and validation notes.
+- [ ] Gather genuine community feedback through issues, discussions, and contributions.
+
+### Why the work is staged this way
+
+Closed-loop co-simulation needs a stable machine-side model first. The ECE models produced by the three released
+tools are exactly that input. Building the machine side solidly before adding the power stage and the controller
+avoids two simultaneous uncertainties — when something misbehaves, you know which layer to look at.
+
+### Contribution Opportunities
+
+Contributions are welcome in Python automation, test coverage, configuration validation, error diagnostics,
+documentation, and reproducible simulation examples. For integration changes, please report the Ansys and
+MATLAB/Simulink versions used and distinguish results verified in the commercial tools from offline-only tests.
+
+### Dependencies and Limitations
+
+- The repository's automation code is open source, but **Ansys and MATLAB/Simulink are proprietary** and require
+  appropriate licenses for integration and simulation.
+- Exact automation support and solver behavior can vary by software version, model, and environment.
+- Milestones describe intended work, not guaranteed features or delivery dates.
+- AI-assisted contributions are reviewed and validated before being treated as supported functionality.
+
+### Status Updates
+
+Progress is tracked through repository commits, issues, pull requests, and releases.
+This roadmap will be updated as features are implemented and validated.
 
 ---
 
-## 贯穿案例：BMW i3 (e11) IPM 电机
+## Case study: BMW i3 (e11) IPM motor
 
-仓库里的模型与配置都围绕这台电机：
+Every model and configuration in this repository is centered on this machine:
 
-| 参数 | 值 |
+| Parameter | Value |
 |---|---|
-| 极数 / 极对数 | 8 / 4 |
-| 定子外径 | 198 mm |
-| 槽数 | 48 |
-| 每槽导体数 / 每导体匝数 | 108 / 6 |
-| 并联支路 | 2 |
-| 相电阻 Rs | 13.377 mΩ |
-| 永磁磁链 λpm | 0.075883 Wb |
-| Ld（额定点 / 饱和端） | 231.8 / 226.3 µH |
-| Lq（额定点 / 饱和端） | 382.7 / 297.4 µH |
-| 凸极率 | 1.65 |
-| 母线电压 | 400 V |
-| 峰值电流 | 433 A |
+| Poles / pole pairs | 8 / 4 |
+| Stator outer diameter | 198 mm |
+| Slots | 48 |
+| Conductors per slot / turns per conductor | 108 / 6 |
+| Parallel paths | 2 |
+| Phase resistance Rs | 13.377 mΩ |
+| Permanent magnet flux λpm | 0.075883 Wb |
+| Ld (rated / saturated) | 231.8 / 226.3 µH |
+| Lq (rated / saturated) | 382.7 / 297.4 µH |
+| Saliency ratio | 1.65 |
+| DC bus voltage | 400 V |
+| Peak current | 433 A |
 
-由 ECE 数据反推的控制参数（`dist/ece-export/scripts/calc_control_params.py` 可重算）：
+Control parameters derived from the ECE data (recomputable with `dist/ece-export/scripts/calc_control_params.py`):
 
-| 参数 | 值 |
+| Parameter | Value |
 |---|---|
-| MTPA 工作点（实测最优点） | Id = −303.1 A，Iq = 303.1 A → 246.4 N·m |
-| 电流环 Kp_d / Ki_d | 1.456 / 84.05 |
-| 电流环 Kp_q / Ki_q | 2.405 / 84.05 |
-| 各转速可达转矩 | 4000 rpm: 246 N·m · 6000 rpm: 195 N·m · 10000 rpm: 106 N·m |
+| MTPA operating point (measured optimum) | Id = −303.1 A, Iq = 303.1 A → 246.4 N·m |
+| Current-loop Kp_d / Ki_d | 1.456 / 84.05 |
+| Current-loop Kp_q / Ki_q | 2.405 / 84.05 |
+| Achievable torque by speed | 4000 rpm: 246 N·m · 6000 rpm: 195 N·m · 10000 rpm: 106 N·m |
 
-> 电感按**磁链反推**（`Lq = λq/iq`、`Ld = (λd − λpm)/id`），不直接取 MAT 里的 `Ld`/`Lq` 字段——
-> 后者在零电流处是除零产物，量纲与标称不符。
+> Inductances are **back-derived from flux linkage** (`Lq = λq/iq`, `Ld = (λd − λpm)/id`), not read from the
+> `Ld`/`Lq` fields in the MAT file — the latter are division-by-zero artifacts near zero current, with units
+> that do not match the declared `varUnits`.
 
-模型样例：
+Model samples:
 
 ```
 models/
-├── motorcad/e11_User.mot           Motor-CAD 模型（Full Machine 状态）
-└── aedt/E11_FULL/e11_PMSM_IPM.aedt Maxwell 2D，含 PMSM_Healthy + PMSM_UD 两个 design
+├── motorcad/e11_User.mot           Motor-CAD model (Full Machine state)
+└── aedt/E11_FULL/e11_PMSM_IPM.aedt Maxwell 2D, with PMSM_Healthy + PMSM_UD designs
 
-dist/maxwell-ece/models/e11_PMSM_IPM.aedt   工具 3 自带的同一份工程
+dist/maxwell-ece/models/e11_PMSM_IPM.aedt   The same project shipped with tool 3
 ```
 
 ---
 
-## 目录结构
+## Repository layout
 
 ```
 ansys-simulink-pmsm-cosimulation/
-├── dist/                       可独立取用的自包含工具包
-│   ├── simulink-binding/       工具 1：Twin Builder ⇄ Simulink 绑定
-│   ├── ece-export/             工具 2：Motor-CAD ECE 导出
-│   └── maxwell-ece/            工具 3：Maxwell 原生 ECE 提取
+├── dist/                       Self-contained, independently usable tool packages
+│   ├── simulink-binding/       Tool 1: Twin Builder ⇄ Simulink binding
+│   ├── ece-export/             Tool 2: Motor-CAD ECE export
+│   └── maxwell-ece/            Tool 3: Maxwell native ECE extraction
 ├── src/
-│   ├── motorcad_controller/    Motor-CAD 控制
-│   ├── simulink_controller/    Simulink 绑定
-│   └── data_exchange/          .aedt 解析与数据模型
-├── scripts/                    命令行入口
-├── config/                     配置
-├── models/                     电机模型样例
-└── tests/                      单元测试
+│   ├── motorcad_controller/    Motor-CAD control
+│   ├── simulink_controller/    Simulink binding
+│   └── data_exchange/          .aedt parsing and data models
+├── scripts/                    CLI entry points
+├── config/                     Configuration
+├── models/                     Sample motor models
+└── tests/                      Unit tests
 ```
 
 ---
 
-## 环境要求
+## Requirements
 
-| 组件 | 版本 | 说明 |
+| Component | Version | Notes |
 |---|---|---|
-| Python | 3.12 | 建议 conda 环境 |
-| ansys-motorcad-core | 0.8.8 | Motor-CAD 控制 |
-| pyaedt | 1.4.0 | AEDT 控制（导入路径 `ansys.aedt.core`） |
-| matlabengine | 24.2 | 配 MATLAB R2024b |
-| AEDT | 2026 R1 | 含 Maxwell 2D/3D、Twin Builder |
+| Python | 3.12 | conda environment recommended |
+| ansys-motorcad-core | 0.8.8 | Motor-CAD control |
+| pyaedt | 1.4.0 | AEDT control (import path `ansys.aedt.core`) |
+| matlabengine | 24.2 | Pairs with MATLAB R2024b |
+| AEDT | 2026 R1 | Including Maxwell 2D/3D and Twin Builder |
 | Motor-CAD | 2026 R1 | |
 | MATLAB | R2024b | |
 
-许可服务器地址按本机环境配置（`ANSYSLMD_LICENSE_FILE`），不写进仓库。
+The license server address is configured per machine (`ANSYSLMD_LICENSE_FILE`); it is not stored in the repository.
 
 ---
 
-## 快速开始
+## Quick start
 
 ```powershell
-# 1. 装依赖
+# 1. Install dependencies
 conda create -n pmsm python=3.12
 conda activate pmsm
 pip install ansys-motorcad-core==0.8.8 pyaedt==1.4.0 matlabengine==24.2
 
-# 2. 跑单测（不需要安装 Ansys / MATLAB）
+# 2. Run the unit tests (Ansys and MATLAB not required)
 python -m pytest tests/ -q
 
-# 3. 各工具单独使用，见其 README
+# 3. Use each tool individually — see its own README
 ```
 
 ---
 
-## 一点说明
+## A note on how these tools came to be
 
-这些工具是在真实工程里**撞出来的**，不是先设计好再实现。所以代码和 README 里保留了大量实测记录：
+These tools were **not designed up front and then implemented** — they were shaped by real engineering work.
+That is why the code and READMEs retain a large amount of measured detail:
 
-- 某个 API 不能用、换哪条路能用
-- 某个参数填错会导致什么后果（比如网格必须含 0 A）
-- 某条路试过但失败，为什么放弃
+- which API does not work, and which path around it does
+- what goes wrong when a parameter is set incorrectly (the grid must contain 0 A, for instance)
+- which approaches were tried and abandoned, and why
 
-它们对后来者比结论本身更有用——同样的坑不必再踩一遍。
+That record is worth more to the next person than the conclusions alone — the same mistakes need not be made twice.
 
 ---
 
-## 授权
+## License
 
-本仓库代码用于电机仿真自动化研究。模型数据（BMW i3 电机参数）来自公开资料。
-Ansys 与 MATLAB 为商业软件，需自行取得许可。
+The code in this repository is released for research on motor simulation automation.
+Motor parameters (BMW i3) derive from publicly available sources.
+Ansys and MATLAB are commercial software and require their own licenses.
