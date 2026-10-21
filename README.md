@@ -185,7 +185,6 @@ ansys-simulink-pmsm-cosimulation/
 │   ├── ece-export/             工具 2：Motor-CAD ECE 导出
 │   └── maxwell-ece/            工具 3：Maxwell 原生 ECE 提取
 ├── src/
-│   ├── maxwell_ece/            工具 3 的源码位置（与 dist 同步）
 │   ├── motorcad_controller/    Motor-CAD 控制
 │   ├── simulink_controller/    Simulink 绑定
 │   └── data_exchange/          .aedt 解析与数据模型
