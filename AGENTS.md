@@ -1,4 +1,4 @@
-# AGENTS.md — thincoder-pmsm Project Guide
+# AGENTS.md — Ansys-Simulink PMSM Cosimulation Scripts Project Guide
 
 ## Project Overview
 
@@ -25,7 +25,7 @@ Motor-CAD 导出 Maxwell 脚本前须设置 Model Size = Full Machine（.mot 条
 | AEDT | 2026 R1 (v261) | `E:\ANSYS Inc\v261\AnsysEM\ansysedt.exe`；含 Maxwell 2D/3D、Twin Builder、`MaxwellSimulink.dll` |
 | Motor-CAD | 2026R1 | `E:\ANSYS Inc\v261\motorcad\MotorCAD.exe`；同目录有 `Motor-CAD.chm`/`Tutorials/`/`Python/` |
 | MATLAB | R2024b | `E:\Program Files\MATLAB\R2024b`；MEX 默认 MSVC 2022 |
-| 许可 | 1055@localhost | `ANSYSLMD_LICENSE_FILE`；M0 三工具实机启动均成功（间接确认） |
+| 许可 | `<port>@<license-server>`（按本机环境配置） | `ANSYSLMD_LICENSE_FILE`；M0 三工具实机启动均成功（间接确认） |
 | matlab-agentic-toolkit | GitHub main | 已克隆 `help/repos/matlab-agentic-toolkit/` |
 
 完整环境清单：`help/environment.md`。
@@ -65,10 +65,16 @@ thincoder-pmsm/
 │   └── motorcad/
 │       ├── e11_User.mot         # ★ Full Machine 状态模板（故障样机导出用）
 │       └── e11_User/            #   MessageLogs（运行日志）
-└── (规划) src/ scripts/ config/ tests/ results/ templates/
+└── src/ scripts/ config/ tests/ results/ templates/
 ```
 
-规划目录：`src/{motorcad_controller,aedt_controller,simulink_controller,data_exchange}/`、`scripts/`（check_env.py / run_m1..m6.py）、`config/{base,cases}.yaml`、`tests/`、`results/<batch>/` 归档。
+目录（实测现状）：`src/{motorcad_controller,simulink_controller,data_exchange}/`、`scripts/`、`config/{base.yaml,cases/}`、`tests/`、`results/<batch>/` 归档。
+
+**已落地**：
+- `src/simulink_controller/` + `scripts/bind_simulink.py` —— Twin Builder ⇄ Simulink 绑定（见 `docs/design/simulink-binding.md`）
+- `src/motorcad_controller/ece_exporter.py` + `scripts/run_ece_export.py` —— Motor-CAD ECE 导出（见 `docs/design/e11-control-model.md` §4）
+- `results/e11-ece/` —— e11 的 ECE 三件套（SML/TXT/MAT），Twin Builder 直接导入
+- `src/aedt_controller/` —— 规划中（M2 Maxwell 建模）
 
 ## Architecture Notes
 

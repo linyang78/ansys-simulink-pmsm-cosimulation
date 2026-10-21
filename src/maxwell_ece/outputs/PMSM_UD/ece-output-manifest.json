@@ -1,0 +1,22 @@
+[
+  {
+    "path": "ece_model.sml",
+    "size": 5675,
+    "sha256": "a67c65d2ba6756298559c4bd58d5f4a617d955601ec632a660a349e1d97129db"
+  },
+  {
+    "path": "ece_table.txt",
+    "size": 3707,
+    "sha256": "305627617555838b8e035e186e974ab173970f12769cd7af19ee5d871c0e205e"
+  },
+  {
+    "path": "logfile",
+    "size": 2106,
+    "sha256": "6ace20a6622496f27516af4756f68cf59ae88c127b24a54ad67af340282366b5"
+  },
+  {
+    "path": "PMSM_UD.sph",
+    "size": 380,
+    "sha256": "9c02d8dbc98dd20aec5fcb3103730ac1605809880fdfd8a0303f42def9169ab2"
+  }
+]

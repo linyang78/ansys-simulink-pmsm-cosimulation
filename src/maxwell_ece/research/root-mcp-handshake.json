@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "tools": [
+    "inspect",
+    "draft",
+    "validate",
+    "prepare",
+    "run",
+    "batch"
+  ],
+  "batch_total_cores_advertised": true,
+  "inspect_is_error": false,
+  "designs": [
+    "PMSM_Healthy",
+    "PMSM_UD"
+  ]
+}

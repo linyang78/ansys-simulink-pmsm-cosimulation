@@ -1,0 +1,17 @@
+{
+  "schema": "maxwell-ece-workflow-v1",
+  "stages": ["inspect", "draft", "validate", "prepare", "run"],
+  "dependencies": {
+    "offline": ["python>=3.10", "standard-library"],
+    "live": ["pmsm conda environment", "PyAEDT", "ANSYS Maxwell 2D"],
+    "mcp": ["mcp package (optional local stdio server)"]
+  },
+  "live_policy": {
+    "source_projects_read_only": true,
+    "new_desktop": true,
+    "close_on_exit": true,
+    "max_parallel_default": 1,
+    "no_shared_aedt_session": true
+  },
+  "evidence": "results/evidence is created below each prepared run when live export succeeds"
+}

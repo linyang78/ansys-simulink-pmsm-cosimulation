@@ -1,0 +1,43 @@
+{
+  "schema": "maxwell-ece-config-v1",
+  "source_project": "C:/Users/xlin/Desktop/simulink/models/maxwell/e11/e11_PMSM_IPM.aedt",
+  "source_hash": "55cf1bc067f689d4b17b1ddb5865bb5f82818e0666c679aeabfa7d2bf3bcb380",
+  "design": "PMSM_Healthy",
+  "setup": "Setup1",
+  "variation": "",
+  "aedt_version": "2026.1",
+  "non_graphical": true,
+  "output_dir": "C:/Users/xlin/Desktop/simulink/versions/v0.3/maxwell_ece/work/progress-probe-20261017",
+  "winding_groups": [
+    "WG_Ph1_P1",
+    "WG_Ph2_P1",
+    "WG_Ph3_P1"
+  ],
+  "ece": {
+    "device_name": "ECE_Model1_ProgressProbe",
+    "current_sweeps": ["0A", "1A"],
+    "suggested_current_limit_source": "probe-only; not a production operating point",
+    "ph_ang_intervals": 2,
+    "resistance": "0.0133773639742649ohm",
+    "inductance": "6.02692576178796e-06H",
+    "rot_ang_max": "360deg",
+    "in_electrical_degrees": false,
+    "rot_ang_intervals": 3,
+    "skew_angle": "0deg",
+    "poles": "8",
+    "slots": "0",
+    "output": 0
+  },
+  "max_estimated_points": 100000,
+  "profile_role": "progress-probe",
+  "production_validated": false,
+  "human_review_required": true,
+  "reviewed": true,
+  "review_notes": [
+    "Small root-owned native progress probe only: 0A/1A, three angle intervals, Slots=0.",
+    "This probe validates orchestration telemetry and native log observation; it is not a production scan."
+  ],
+  "cores": 1,
+  "max_parallel": 1,
+  "keep_desktop_on_error": false
+}

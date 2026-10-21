@@ -1,0 +1,11 @@
+{
+  "_comment": "ECE 提取配置示例。路径相对本文件所在目录解析。使用前把 mot_source 指向你的 .mot。",
+  "mot_source": "../../../models/motorcad/e11_User.mot",
+  "base_name": "e11",
+  "output_dir": "../../../results/e11-ece",
+  "shaft_speed": 6000,
+  "dc_bus_voltage": 400,
+  "machine_temp": 65,
+  "id_max": 433,
+  "current_step": 108.25
+}

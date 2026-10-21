@@ -1,0 +1,13 @@
+{
+  "_comment": "e11 ECE 提取配置（官方脚本用，文件名与键名对齐官方 ece_config.json）。官方脚本读工作目录下的 ece_config.json 与 mot 文件，所以这里放 models/motorcad/ece/。网格须含 Id=0（Motor-CAD 硬性要求），故 8 段 = 9 点/轴，步长 2*433/8 = 108.25。",
+  "mot_file": "e11_User.mot",
+  "shaft_speed": 6000,
+  "dc_bus_voltage": 400,
+  "machine_temp": 65,
+  "Id_max": 433,
+  "current_step": 108.25,
+  "torque_points_per_cycle": 30,
+  "map_name": "ECE_e11_map.mat",
+  "txt_file": "ECE_e11_txt_file.txt",
+  "sml_file": "ECE_e11_sml_file.sml"
+}

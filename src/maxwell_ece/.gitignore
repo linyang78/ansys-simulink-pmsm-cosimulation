@@ -1,0 +1,6 @@
+work/
+__pycache__/
+tests/__pycache__/
+research/*.txt
+research/*.log
+config/_*.json

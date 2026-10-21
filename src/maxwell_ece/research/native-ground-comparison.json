@@ -1,0 +1,8 @@
+{
+  "without_ground": "C:\\Users\\xlin\\Desktop\\simulink\\versions\\v0.3\\maxwell_ece\\research\\native-without-ground.sph",
+  "with_ground": "C:\\Users\\xlin\\Desktop\\simulink\\versions\\v0.3\\maxwell_ece\\research\\native-ground-reference.sph",
+  "identical_netlist_text": true,
+  "ground_component": "GPort@0",
+  "ece3_pins": 0,
+  "ecer_pins": 0
+}

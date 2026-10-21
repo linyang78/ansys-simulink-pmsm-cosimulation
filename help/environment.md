@@ -31,7 +31,7 @@
 | AEDT 2026 R1 (v261) | `E:\ANSYS Inc\v261\AnsysEM\ansysedt.exe` | 2026.1.0；含 Maxwell 2D/3D、Twin Builder(Simplorer)、`MaxwellSimulink.dll`（Simulink 耦合）、`DigitalTwinFitting.dll`（ROM） |
 | Motor-CAD 2026R1 | `E:\ANSYS Inc\v261\motorcad\MotorCAD.exe` | 2026.1.1；并入 ANSYS 26.1 目录；同目录含 `Motor-CAD.chm`（官方帮助）、`Tutorials/`、`Python/`、`FMU/` |
 | 安装包 | 未核实（重装系统前的 `D:\仿真软件安装包\ANSYS2026R1\` 未复查） | 重装/补组件前先确认安装包位置 |
-| 许可 | `1055@localhost`（ANSYSLMD_LICENSE_FILE，2026-10-20 实测） | PLE Licensing 2026 R1 服务运行中 |
+| 许可 | `<port>@<license-server>`（按本机环境配置） | PLE Licensing 2026 R1 服务运行中 |
 
 环境变量（旧 M0 记录，未重测）：`ANSYSEM_ROOT261`、`AWP_ROOT261`、`SIMPLORER_HOME`、`MOTORCAD_ACTIVEX` 已配置；`ANSYS261_DIR` 指向不存在目录（遗留变量，无影响）。
 

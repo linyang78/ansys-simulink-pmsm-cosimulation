@@ -1,0 +1,32 @@
+{
+  "schema": "maxwell-ece-config-v1",
+  "source_project": "C:/Users/xlin/Desktop/simulink/versions/v0.3/models/maxwell/healthy/e11_healthy/e11_healthy.aedt",
+  "source_hash": "7b92fb142cc022b5b26d2c79c6b4df59dacd0d27da908795e2c2c3d03afb06ea",
+  "design": "healthy",
+  "setup": "Setup1",
+  "variation": "",
+  "aedt_version": null,
+  "non_graphical": true,
+  "output_dir": "C:/Users/xlin/Desktop/simulink/versions/v0.3/maxwell_ece/work",
+  "winding_groups": ["WG_Ph1_P1", "WG_Ph2_P1", "WG_Ph3_P1"],
+  "ece": {
+    "device_name": "ECE_Model1",
+    "current_sweeps": ["0A", "100A", "200A", "433A"],
+    "ph_ang_intervals": 2,
+    "resistance": "0.0133773639742649ohm",
+    "inductance": "6.02692576178796e-06H",
+    "rot_ang_max": "360deg",
+    "in_electrical_degrees": false,
+    "rot_ang_intervals": 360,
+    "skew_angle": "0deg",
+    "poles": "8",
+    "slots": "48",
+    "output": 0
+  },
+  "human_review_required": true,
+  "reviewed": false,
+  "review_notes": [
+    "确认绕组顺序、极性、机械轴约定和扫描点。",
+    "确认 360deg 机械周期及 ABC/DQ0/LdLqFm 输出。"
+  ]
+}

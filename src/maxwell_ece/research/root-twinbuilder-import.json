@@ -1,0 +1,22 @@
+{
+  "imported": true,
+  "model": "ECE_Model1_ECER",
+  "components": [
+    {
+      "name": "CompInst@ECE_Model1_ECER",
+      "pins": [
+        "A0",
+        "X0",
+        "B0",
+        "Y0",
+        "C0",
+        "Z0",
+        "ROT1",
+        "ROT2"
+      ]
+    }
+  ],
+  "native_errors": [],
+  "saved": true,
+  "project": "C:\\Users\\xlin\\Desktop\\simulink\\versions\\v0.3\\maxwell_ece\\work\\twinbuilder-import-check\\ece_import_check.aedt"
+}

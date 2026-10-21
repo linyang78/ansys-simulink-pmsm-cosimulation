@@ -1,0 +1,11 @@
+{
+  "_comment": "e11 ECE 提取配置——20×20 电流网格版。网格点数须为奇数使 Id=0 落在中心（Motor-CAD 要求：Saturation and Loss Map Export requires a point at Id = 0），故 20 段 = 21 点/轴，步长 2*433/20 = 43.3 A。产物目录独立，与 8×8 版并列不覆盖。",
+  "mot_source": "../../models/motorcad/e11_User.mot",
+  "base_name": "e11_20x20",
+  "output_dir": "../../results/e11-ece-20x20",
+  "shaft_speed": 6000,
+  "dc_bus_voltage": 400,
+  "machine_temp": 65,
+  "id_max": 433,
+  "current_step": 43.3
+}

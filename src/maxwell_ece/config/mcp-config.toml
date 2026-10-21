@@ -1,0 +1,4 @@
+# Local example only; do not install this file into a global MCP registry.
+[mcp_servers.maxwell_ece]
+command = "C:/Env/miniconda3/envs/pmsm/python.exe"
+args = ["C:/Users/xlin/Desktop/simulink/versions/v0.3/maxwell_ece/scripts/maxwell_ece.py", "mcp"]

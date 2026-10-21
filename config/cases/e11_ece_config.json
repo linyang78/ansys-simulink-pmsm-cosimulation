@@ -1,0 +1,11 @@
+{
+  "_comment": "e11 ECE 提取配置。对应设计 docs/design/e11-control-model.md §4.2。原文件 models/motorcad/e11_User.mot 只读，脚本先复制到工作目录再算。",
+  "mot_source": "../../models/motorcad/e11_User.mot",
+  "base_name": "e11",
+  "output_dir": "../../results/e11-ece",
+  "shaft_speed": 6000,
+  "dc_bus_voltage": 400,
+  "machine_temp": 65,
+  "id_max": 433,
+  "current_step": 108.25
+}

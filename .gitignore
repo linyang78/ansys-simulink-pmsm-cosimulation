@@ -6,6 +6,9 @@ __pycache__/
 .Python
 build/
 dist/
+# dist/ 下是交付包（自包含工具包），要纳入版本库；上面排除的是构建产物
+!dist/
+!dist/**
 *.egg-info/
 .venv/
 venv/
@@ -23,6 +26,9 @@ help/repos/
 
 # ===== Ansys 官方帮助快照（66.8 MB，生成物，不纳入版本库）=====
 help/ansys-help-topics/
+
+# ===== 旧项目归档（含旧环境内部信息，不上传）=====
+help/legacy-simulation_workflow/
 
 # ===== AEDT 运行产物 =====
 *.aedtresults/
@@ -72,3 +78,22 @@ models/motorcad/**/MessageLogs/
 Thumbs.db
 desktop.ini
 *.bak
+
+# ===== Motor-CAD ECE 导出（results/e11-ece/）=====
+# 三件套是交付物，要纳入版本库；上面的 *.sml 规则是给 AEDT 运行产物用的，这里单独放开
+!results/e11-ece/ECE_*.sml
+# FEA 中间产物（单次运行数百 MB）不进库
+results/**/work/
+
+# ===== Motor-CAD FEA 中间结果（可由 .mot 重跑，单文件 7~10 MB）=====
+models/motorcad/**/FEResultsData/
+*.mes
+
+# ===== 大体积扫描数据（由 dist/ece-export 可重新生成）=====
+# 61×61 及更高密度的饱和图 MAT 单文件 30 MB 以上；低密度样例保留以便对照
+results/**/ECE_*_map.mat
+results/**/*_txt_file.txt
+
+# ===== 会话临时 =====
+batch.log
+

@@ -16,10 +16,24 @@ help/
 │   │   └─ https://github.com/ansys/pyaedt-mcp.git
 │   └── matlab-agentic-toolkit/       ← matlab/matlab-agentic-toolkit；MATLAB agent 插件
 │       └─ https://github.com/matlab/matlab-agentic-toolkit.git
-├── docs/                             ← 在线 API 文档快照
+├── docs/                             ← 在线 API 文档快照 + 学习笔记
 │   ├── motorcad_methods_index.md     ← PyMotorCAD API 索引 + 常用方法速查
 │   ├── motorcad_samples_index.md     ← PyMotorCAD 示例索引（本地示例位置）
-│   └── aedt_api_index.md             ← PyAEDT API 索引 + 本项目相关 App/模块
+│   ├── aedt_api_index.md             ← PyAEDT API 索引 + 本项目相关 App/模块
+│   ├── ipm-foc-mtpa-field-weakening.md ← IPM 原理 + FOC/MTPA/弱磁学习笔记（整理版）
+│   └── mathworks/                    ← MathWorks 官方原文存档（中英对照）
+│       ├── README.md                 ← 索引 + 源地址 + 访问说明
+│       ├── mtpacontrolreference.en.md / .zh-CN.md
+│       ├── field-weakening-control-mtpa-pmsm.en.md / .zh-CN.md
+│       ├── field-oriented-control.en.md / .zh-CN.md
+│       ├── pmsm-characteristics-constraint-curves.md   ← 约束曲线/MTPV（中英对照）
+│       ├── fwc-mtpa-nonlinear-pmsm-lut.md              ← 非线性查表弱磁（中英对照）
+│       ├── gain-calculation-and-tuning.md              ← 增益计算与整定
+│       ├── open-loop-and-closed-loop-control.md        ← 开环/闭环控制
+│       ├── per-unit-system.md                          ← 标幺制
+│       └── sq-pmsm-block.md                            ← Simscape PMSM 模块
+├── matlab-examples/                  ← 随 MATLAB 安装的官方示例（R2024b，本地复制）
+│   └── field-weakening-mtpa/         ← Motor Control Blockset：Field-Weakening Control (with MTPA) of PMSM（18 个文件）
 ├── ansys-help-topics/                ← Ansys 官方帮助主题（25 个，66.8MB，来自前身项目整理）
 │   ├── Maxwell/  Circuit/  Twin Builder/  Basic Elements/  Power System/   （大主题，md 单页）
 │   ├── MaxwellScriptingGuide/  CircuitScriptingGuide/  Twin BuilderScriptingGuide/  （脚本指南）
@@ -57,6 +71,8 @@ help/
 | Simulink 自动化 | `repos/matlab-agentic-toolkit/README.md` + `legacy-simulation_workflow/docs/aedt-mcp-usage.md` |
 | AEDT MCP（gRPC） | `repos/pyaedt-mcp/`（doc/ + README）+ `legacy-simulation_workflow/docs/aedt-mcp-usage.md` |
 | 环境/版本/许可 | `environment.md` |
+| IPM 原理 / MTPA / 弱磁理论 | `docs/mathworks/`（官方原文中英对照）+ `docs/ipm-foc-mtpa-field-weakening.md`（整理版） |
+| Simulink 电机控制示例（可直接跑） | `matlab-examples/field-weakening-mtpa/`（MCB 官方示例，18 文件） |
 | 整体架构/路线图 | `legacy-simulation_workflow/readme.md` |
 
 ## 维护约定
