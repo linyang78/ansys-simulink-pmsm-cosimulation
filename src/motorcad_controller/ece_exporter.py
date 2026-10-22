@@ -1,7 +1,7 @@
 """ECE（等效电路提取）导出：Motor-CAD → Twin Builder 可导入的 SML / TXT / MAT 三件套。
 
-对应设计 `docs/design/e11-control-model.md` §4。逻辑移植自官方示例
-`help/repos/pymotorcad/examples/links/ece_export_for_twinbuilder.py`（779 行），差异有三处：
+对应设计 §4。逻辑移植自官方示例
+PyMotorCAD 官方示例（779 行），差异有三处：
 
 1. 参数改为构造期传入（官方从 `ece_config.json` 现读），便于单测；
 2. 计算与写文件拆成独立函数，纯数据变换部分不碰 Motor-CAD，可离线测；

@@ -1,6 +1,6 @@
 """e11 IPM 控制参数计算：从 ECE 数据反推电机参数、MTPA/弱磁轨迹与 PI 增益。
 
-对应文档 `help/docs/e11-parameter-derivation.md`。
+对应文档 本工具的开发者手册。
 
 设计原则：
 - **只用 ECE 的磁链表**，不用 MAT 里的 `Ld`/`Lq` 字段——后者在零电流处是除零产物

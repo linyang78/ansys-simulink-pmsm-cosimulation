@@ -1,6 +1,6 @@
 """pywinauto 窗口线程：接手 `Simplorer Link Assignment Dialog` 并完成勾选 / Browse / 选 design / OK。
 
-对应设计 `docs/design/simulink-binding.md` §2.2（窗口判据与交接）、§2.3（三种异常）、
+对应设计 §2.2（窗口判据与交接）、§2.3（三种异常）、
 §4.1 第 3–9 步（窗口侧动作）、§4.2（Browse 原生文件对话框）。
 
 本线程只做窗口动作并回填 `BindingResult`，不碰 MATLAB 引擎；

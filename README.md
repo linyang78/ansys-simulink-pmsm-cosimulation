@@ -300,9 +300,9 @@ Every model and configuration in this repository is centered on this machine:
 | Parallel paths | 2 |
 | Phase resistance Rs | 13.377 mΩ |
 | Permanent magnet flux λpm | 0.075883 Wb |
-| Ld (rated / saturated) | 231.8 / 226.3 µH |
-| Lq (rated / saturated) | 382.7 / 297.4 µH |
-| Saliency ratio | 1.65 |
+| Ld (rated / saturated) | 198.2 / 226.3 µH |
+| Lq (rated / saturated) | 378.6 / 297.4 µH |
+| Saliency ratio | 1.91 |
 | DC bus voltage | 400 V |
 | Peak current | 433 A |
 
@@ -310,10 +310,10 @@ Control parameters derived from the ECE data (recomputable with `dist/ece-export
 
 | Parameter | Value |
 |---|---|
-| MTPA operating point (measured optimum) | Id = −303.1 A, Iq = 303.1 A → 246.4 N·m |
-| Current-loop Kp_d / Ki_d | 1.456 / 84.05 |
-| Current-loop Kp_q / Ki_q | 2.405 / 84.05 |
-| Achievable torque by speed | 4000 rpm: 246 N·m · 6000 rpm: 195 N·m · 10000 rpm: 106 N·m |
+| MTPA operating point (measured optimum) | Id = −307.9 A, Iq = 298.3 A → 246.4 N·m |
+| Current-loop Kp_d / Ki_d | 1.246 / 84.05 |
+| Current-loop Kp_q / Ki_q | 2.379 / 84.05 |
+| Achievable torque by speed | 4000 rpm: 246 N·m · 6000 rpm: 202 N·m · 10000 rpm: 117 N·m |
 
 > Inductances are **back-derived from flux linkage** (`Lq = λq/iq`, `Ld = (λd − λpm)/id`), not read from the
 > `Ld`/`Lq` fields in the MAT file — the latter are division-by-zero artifacts near zero current, with units

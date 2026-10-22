@@ -1,0 +1,1 @@
+- [x] T1: pyaedt-mcp 安装+验证+文档+项目memory（CLI 宿主已通：19 工具实连）

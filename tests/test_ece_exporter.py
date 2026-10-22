@@ -1,6 +1,6 @@
 """ECE 导出模块单测：只测不依赖 Motor-CAD 的纯数据部分。
 
-对应设计 `docs/design/e11-control-model.md` §4.3（产出物）与 §6（验收标准 F2）。
+对应设计 §4.3（产出物）与 §6（验收标准 F2）。
 Motor-CAD 相关步骤（反电势、饱和图）需真实实例，不在单测范围——由 `scripts/run_ece_export.py`
 的端到端运行覆盖。
 """

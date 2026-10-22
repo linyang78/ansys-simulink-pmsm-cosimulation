@@ -1,6 +1,6 @@
 """命令行入口：从 Motor-CAD 导出 e11 的 ECE 模型（SML / TXT / MAT 三件套）。
 
-对应设计 `docs/design/e11-control-model.md` §4（ECE 提取流程）与 §4.5（.mot 只读，先复制再算）。
+对应设计 §4（ECE 提取流程）与 §4.5（.mot 只读，先复制再算）。
 
 用法：
     python scripts/run_ece_export.py --config config/cases/e11_ece_config.json

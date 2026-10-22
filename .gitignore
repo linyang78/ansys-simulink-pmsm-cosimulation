@@ -20,15 +20,31 @@ venv/
 .thincoder/tmp/
 .thincoder/memory/
 
-# ===== 第三方克隆仓库（公开仓库，按 URL 重新克隆即可）=====
-# 来源清单内联在 help/README.md 的目录总览
-help/repos/
+# ===== 资料库与开发过程记录（不上传）=====
+# help/ 含第三方仓库克隆、Ansys 官方帮助快照、旧项目归档
+help/
 
-# ===== Ansys 官方帮助快照（66.8 MB，生成物，不纳入版本库）=====
-help/ansys-help-topics/
+# ===== 需求与设计文档（开发过程，不上传）=====
+docs/
 
-# ===== 旧项目归档（含旧环境内部信息，不上传）=====
-help/legacy-simulation_workflow/
+# ===== 项目状态文件（本地开发用）=====
+PROJECT-MANIFEST.json
+
+# ===== 运行产物与手工调试模型（不上传）=====
+results/
+models/manual/
+models/aedt/E11/
+models/aedt/E11_ece.aedt
+models/motorcad/*.txt
+
+# ===== maxwell_ece 开发过程记录（不上传）=====
+src/maxwell_ece/research/
+src/maxwell_ece/outputs/
+src/maxwell_ece/work/
+src/maxwell_ece/config/archive/
+src/maxwell_ece/config/e11-healthy-draft.json
+src/maxwell_ece/config/inspection.json
+src/maxwell_ece/docs/
 
 # ===== AEDT 运行产物 =====
 *.aedtresults/
@@ -72,6 +88,9 @@ slprj/
 
 # ===== Motor-CAD 运行日志 =====
 models/motorcad/**/MessageLogs/
+# Motor-CAD 运行配置（每次运行自动生成，含本机路径）
+models/motorcad/**/feasys/
+models/motorcad/**/Lab/
 
 # ===== 通用 =====
 .DS_Store

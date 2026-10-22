@@ -1,0 +1,11 @@
+{
+  "_comment": "e11 ECE 最高精度扫描：91×91 电流网格（点数须为奇数使 Id=0 落在中心，Motor-CAD 硬性要求）。实测 3.93 s/负载点，8281 点约 9.0 h，预计 19:20 完成。产物目录独立，不覆盖已有网格。",
+  "mot_source": "../../models/motorcad/e11_User.mot",
+  "base_name": "e11_91x91",
+  "output_dir": "../../results/e11-ece-91x91",
+  "shaft_speed": 6000,
+  "dc_bus_voltage": 400,
+  "machine_temp": 65,
+  "id_max": 433,
+  "current_step": 9.622222222222222
+}

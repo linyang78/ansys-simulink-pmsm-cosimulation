@@ -26,9 +26,9 @@ Motor-CAD 导出 Maxwell 脚本前须设置 Model Size = Full Machine（.mot 条
 | Motor-CAD | 2026R1 | `E:\ANSYS Inc\v261\motorcad\MotorCAD.exe`；同目录有 `Motor-CAD.chm`/`Tutorials/`/`Python/` |
 | MATLAB | R2024b | `E:\Program Files\MATLAB\R2024b`；MEX 默认 MSVC 2022 |
 | 许可 | `<port>@<license-server>`（按本机环境配置） | `ANSYSLMD_LICENSE_FILE`；M0 三工具实机启动均成功（间接确认） |
-| matlab-agentic-toolkit | GitHub main | 已克隆 `help/repos/matlab-agentic-toolkit/` |
+| matlab-agentic-toolkit | GitHub main | 公开仓库，按需自行克隆 |
 
-完整环境清单：`help/environment.md`。
+完整环境清单见本文件 Tech Stack 表。
 
 ## Common Commands
 
@@ -52,29 +52,31 @@ Motor-CAD 导出 Maxwell 脚本前须设置 Model Size = Full Machine（.mot 条
 ## Directory Layout
 
 ```
-thincoder-pmsm/
+ansys-simulink-pmsm-cosimulation/
 ├── AGENTS.md                    # 本文件
-├── .mcp.json                    # ThinCoder MCP 配置（pyaedt-mcp → pmsm env，stdio）
-├── help/                        # 资料库（索引见 help/README.md）
-│   ├── environment.md           #   本机环境清单（随检测结果更新）
-│   ├── repos/                   #   GitHub 克隆：pymotorcad / pyaedt-mcp / matlab-agentic-toolkit
-│   ├── docs/                    #   在线 API 文档快照（motorcad/aedt 索引）
-│   ├── ansys-help-topics/       #   Ansys 官方帮助 25 主题（脚本指南/联合仿真教程/组件库）
-│   └── legacy-simulation_workflow/  # 旧项目归档（仅参考，结论需回归）
+├── README.md                    # 仓库说明
+├── dist/                        # 可独立取用的工具包
+│   ├── simulink-binding/        #   工具 1：Twin Builder ⇄ Simulink 绑定
+│   └── ece-export/              #   工具 2：Motor-CAD ECE 导出
+├── src/
+│   ├── maxwell_ece/             #   工具 3：Maxwell 原生 ECE 提取
+│   ├── motorcad_controller/
+│   ├── simulink_controller/
+│   └── data_exchange/
 ├── models/
-│   └── motorcad/
-│       ├── e11_User.mot         # ★ Full Machine 状态模板（故障样机导出用）
-│       └── e11_User/            #   MessageLogs（运行日志）
-└── src/ scripts/ config/ tests/ results/ templates/
+│   ├── motorcad/
+│   │   └── e11_User.mot         # ★ Full Machine 状态模板（故障样机导出用）
+│   └── aedt/                    #   Maxwell 工程（Healthy / UD 两个 design）
+└── scripts/ config/ tests/ results/
 ```
 
-目录（实测现状）：`src/{motorcad_controller,simulink_controller,data_exchange}/`、`scripts/`、`config/{base.yaml,cases/}`、`tests/`、`results/<batch>/` 归档。
+目录（实测现状）：`src/{motorcad_controller,simulink_controller,data_exchange,maxwell_ece}/`、`scripts/`、`config/`、`tests/`、`results/<batch>/` 归档。
 
 **已落地**：
-- `src/simulink_controller/` + `scripts/bind_simulink.py` —— Twin Builder ⇄ Simulink 绑定（见 `docs/design/simulink-binding.md`）
-- `src/motorcad_controller/ece_exporter.py` + `scripts/run_ece_export.py` —— Motor-CAD ECE 导出（见 `docs/design/e11-control-model.md` §4）
+- `src/simulink_controller/` + `scripts/bind_simulink.py` —— Twin Builder ⇄ Simulink 绑定（用法见 `dist/simulink-binding/README.md`）
+- `src/motorcad_controller/ece_exporter.py` + `scripts/run_ece_export.py` —— Motor-CAD ECE 导出（用法见 `dist/ece-export/README.md`）
+- `src/maxwell_ece/` —— Maxwell 原生 ECE 提取（用法见 `src/maxwell_ece/README.zh-CN.md`）
 - `results/e11-ece/` —— e11 的 ECE 三件套（SML/TXT/MAT），Twin Builder 直接导入
-- `src/aedt_controller/` —— 规划中（M2 Maxwell 建模）
 
 ## Architecture Notes
 
@@ -85,8 +87,8 @@ M0 环境检测 ✅ (2026-08-18) → M1 Motor-CAD 快速建模 → M2 Maxwell �
                   → M4 Simulink 控制耦合 → M5 故障注入(场景矩阵) → M6 批量运行+报告
 ```
 
-**M0 结论（2026-08-18 实测，详见 help/environment.md §5）**：
-- **pyaedt-mcp 全链路通**：launch_aedt（Maxwell2d gRPC 36357）✅、独立 MCP server（HTTP）✅、--connect 发现本机常驻 gRPC 会话（端口 50051 / PID 43448）✅、run_python_code 执行+result 回传 ✅、19 工具清单确认（2026-09-14 复核：该常驻会话已不在、当前无 `ansysedt` 进程；现行挂载与启用判据见 `help/environment.md` §5）
+**M0 结论（2026-08-18 实测）**：
+- **pyaedt-mcp 全链路通**：launch_aedt（Maxwell2d gRPC）✅、独立 MCP server（HTTP）✅、run_python_code 执行+result 回传 ✅
 - Motor-CAD 实例 10.9s 启动 ✅，`e11_User.mot` 加载 ✅，**`MagneticSymmetry=1`（full 状态实测确认）**，但 `MagneticSymmetryFactor=8` → M1 导出时验证脚本 SymmetryFactor
 - MATLAB Engine 6.8s 启动 ✅，R2024b 执行 ✅
 
@@ -127,12 +129,4 @@ M0 环境检测 ✅ (2026-08-18) → M1 Motor-CAD 快速建模 → M2 Maxwell �
 - 中文注释与日志（项目内中文为主）
 - 本机 shell 一律用 pwsh 或 node/python 脚本；cmd 中文乱码，bash 双引号内 `$_` 会被吞
 - 提交前检查：勿把临时文件/日志/生成物（models/ results/ 产物）打包进 commit
-- 里程碑状态同步更新 AGENTS.md 与本项目文档
-
-## 工作约定（资料/环境）
-
-- 新增资料放 `help/` 对应子目录并在 `help/README.md` 登记；在线文档快照标注日期+URL
-- 环境版本/路径/检测结果有变化时更新 `help/environment.md` 与本文 Tech Stack 表
-- 旧项目资料只读参考（`help/legacy-simulation_workflow/`），结论使用前须回归
-- Motor-CAD 相关操作优先查：`help/ansys-help-topics/Ansys_Maxwell_Export/`（导出文档）、`help/repos/pymotorcad/examples/`
-- AEDT/TB 相关操作优先查：`help/ansys-help-topics/` 下各脚本指南与教程
+- 里程碑状态同步更新 AGENTS.md
